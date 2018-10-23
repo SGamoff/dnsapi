@@ -1,0 +1,1263 @@
+{
+	"variables": [],
+	"info": {
+		"name": "DNSapi",
+		"_postman_id": "27d8b3a8-a309-1dcc-db0b-65762944bbf0",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "service operations",
+			"description": "",
+			"item": [
+				{
+					"name": "Create new service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var serviceSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"name\",",
+									"    \"port\",",
+									"    \"server_type\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"name\": {",
+									"      \"$id\": \"#/properties/name\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Name Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"127.0.0.1\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"port\": {",
+									"      \"$id\": \"#/properties/port\",",
+									"      \"type\": \"integer\",",
+									"      \"title\": \"The Port Schema\",",
+									"      \"default\": 0,",
+									"      \"examples\": [",
+									"        53",
+									"      ]",
+									"    },",
+									"    \"server_type\": {",
+									"      \"$id\": \"#/properties/server_type\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Server_type Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"bind9\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"var serviceReturned = JSON.parse(responseBody);",
+									"tests[\"Service was created\"] = tv4.validate(serviceReturned, serviceSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/service/",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "port",
+									"value": "953",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "127.0.0.1",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Create service (POST)"
+					},
+					"response": []
+				},
+				{
+					"name": "List detail service by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var serviceSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"name\",",
+									"    \"port\",",
+									"    \"server_type\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"name\": {",
+									"      \"$id\": \"#/properties/name\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Name Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"127.0.0.1\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"port\": {",
+									"      \"$id\": \"#/properties/port\",",
+									"      \"type\": \"integer\",",
+									"      \"title\": \"The Port Schema\",",
+									"      \"default\": 0,",
+									"      \"examples\": [",
+									"        53",
+									"      ]",
+									"    },",
+									"    \"server_type\": {",
+									"      \"$id\": \"#/properties/server_type\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Server_type Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"bind9\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var serviceNotFoundSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"detail\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"detail\": {",
+									"      \"$id\": \"#/properties/detail\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Detail Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"Not found.\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var serviceReturned = JSON.parse(responseBody);",
+									"tests[\"Service was found\"] = tv4.validate(serviceReturned, serviceSchema);",
+									"tests[\"Service not found\"] = tv4.validate(serviceReturned, serviceNotFoundSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/service/2",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic dGVzdFJlc3Q6Y3c3RzFxeTI4YVhOVFVYNA==",
+								"description": "",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"description": "",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "port",
+									"value": "53",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "127.0.0.1",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "path",
+									"value": "/tmp/1.db",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Get service id 2 (GET)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete service by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;",
+									"",
+									"var serviceScheme = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"detail\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"detail\": {",
+									"      \"$id\": \"#/properties/detail\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Detail Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"Not found.\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var serviceReturned = JSON.parse(responseBody);",
+									"tests[\"Service was deleted. Or service not exist\"] = tv4.validate(serviceReturned, serviceScheme);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/service/2",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "port",
+									"value": "953",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "127.0.0.1",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Delete service (DELETE)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "zone operations",
+			"description": "",
+			"item": [
+				{
+					"name": "Create new zone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"path_file\",",
+									"    \"zone_name\",",
+									"    \"zone_type\",",
+									"    \"zone_text\",",
+									"    \"service\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"path_file\": {",
+									"      \"$id\": \"#/properties/path_file\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Path_file Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"~/PycharmProjects/dnsapi/docker/conf/localhost.zone\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_name\": {",
+									"      \"$id\": \"#/properties/zone_name\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_name Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"localhost\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_type\": {",
+									"      \"$id\": \"#/properties/zone_type\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_type Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"FWD\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_text\": {",
+									"      \"$id\": \"#/properties/zone_text\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_text Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"service\": {",
+									"      \"$id\": \"#/properties/service\",",
+									"      \"type\": \"integer\",",
+									"      \"title\": \"The Service Schema\",",
+									"      \"default\": 0,",
+									"      \"examples\": [",
+									"        1",
+									"      ]",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "path_file",
+									"value": "/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost.zone",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "zone_name",
+									"value": "localhost",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "zone_type",
+									"value": "FWD",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "service",
+									"value": "1",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Create zone (POST)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get zone with id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"path_file\",",
+									"    \"zone_name\",",
+									"    \"zone_type\",",
+									"    \"zone_text\",",
+									"    \"service\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"path_file\": {",
+									"      \"$id\": \"#/properties/path_file\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Path_file Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"~/PycharmProjects/dnsapi/docker/conf/localhost.zone\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_name\": {",
+									"      \"$id\": \"#/properties/zone_name\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_name Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"localhost\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_type\": {",
+									"      \"$id\": \"#/properties/zone_type\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_type Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"FWD\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"zone_text\": {",
+									"      \"$id\": \"#/properties/zone_text\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Zone_text Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    },",
+									"    \"service\": {",
+									"      \"$id\": \"#/properties/service\",",
+									"      \"type\": \"integer\",",
+									"      \"title\": \"The Service Schema\",",
+									"      \"default\": 0,",
+									"      \"examples\": [",
+									"        1",
+									"      ]",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var zoneNotFoundSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"detail\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"detail\": {",
+									"      \"$id\": \"#/properties/detail\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Detail Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"Not found.\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Service was found\"] = tv4.validate(zoneReturned, zoneSchema);",
+									"tests[\"Service not found\"] = tv4.validate(zoneReturned, zoneNotFoundSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic dGVzdFJlc3Q6Y3c3RzFxeTI4YVhOVFVYNA==",
+								"description": "",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"description": "",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "port",
+									"value": "53",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "127.0.0.1",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "path",
+									"value": "/tmp/1.db",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Get zone id 2 (GET)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete zone with id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 204\"] = responseCode.code === 204;",
+									"",
+									"var deleteScheme = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"detail\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"detail\": {",
+									"      \"$id\": \"#/properties/detail\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Detail Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"Not found.\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var deleteReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was deleted. Or zone not exist\"] = tv4.validate(deleteReturned, deleteScheme);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/1",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "path_file",
+									"value": "~/PycharmProjects/dnsapi/docker/conf/localhost.zone",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "zone_name",
+									"value": "localhost",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "zone_type",
+									"value": "FWD",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "service",
+									"value": "1",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Delete zone (POST)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DNS operations",
+			"description": "",
+			"item": [
+				{
+					"name": "Import zone from txt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"message\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"message\": {",
+									"      \"$id\": \"#/properties/message\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Message Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"New zone has been loaded!\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2/import",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Create zone (POST)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Resource Record in localhost zone (DB)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"message\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"message\": {",
+									"      \"$id\": \"#/properties/message\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Message Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"New zone has been loaded!\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2/RR",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "rr_type",
+									"value": "A",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "rr_name",
+									"value": "test333",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "rr_text",
+									"value": "127.0.33.33",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Create RR (POST)"
+					},
+					"response": []
+				},
+				{
+					"name": "Export zone from DB to File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"message\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"message\": {",
+									"      \"$id\": \"#/properties/message\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Message Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"New zone has been loaded!\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2/export",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Export zone (POST)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Resource Record in localhost zone (DB)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"message\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"message\": {",
+									"      \"$id\": \"#/properties/message\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Message Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"New zone has been loaded!\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2/RR",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "rr_type",
+									"value": "A",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "rr_name",
+									"value": "test333",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Delete RR (DELETE)"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Action Reload to BIND",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var zoneSchema = {",
+									"  \"definitions\": {},",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+									"  \"$id\": \"http://example.com/root.json\",",
+									"  \"type\": \"object\",",
+									"  \"title\": \"The Root Schema\",",
+									"  \"required\": [",
+									"    \"message\"",
+									"  ],",
+									"  \"properties\": {",
+									"    \"message\": {",
+									"      \"$id\": \"#/properties/message\",",
+									"      \"type\": \"string\",",
+									"      \"title\": \"The Message Schema\",",
+									"      \"default\": \"\",",
+									"      \"examples\": [",
+									"        \"New zone has been loaded!\"",
+									"      ],",
+									"      \"pattern\": \"^(.*)$\"",
+									"    }",
+									"  }",
+									"}",
+									"",
+									"",
+									"var zoneReturned = JSON.parse(responseBody);",
+									"tests[\"Zone was created\"] = tv4.validate(zoneReturned, zoneSchema);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://127.0.0.1:8000/api/v1/zone/2/reload",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Reload Zone (POST)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "List all service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var serviceSchema = {",
+							"  \"definitions\": {},",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+							"  \"$id\": \"http://example.com/root.json\",",
+							"  \"type\": \"array\",",
+							"  \"title\": \"The Root Schema\",",
+							"  \"items\": {",
+							"    \"$id\": \"#/items\",",
+							"    \"type\": \"object\",",
+							"    \"title\": \"The Items Schema\",",
+							"    \"required\": [",
+							"      \"name\",",
+							"      \"port\",",
+							"      \"server_type\"",
+							"    ],",
+							"    \"properties\": {",
+							"      \"name\": {",
+							"        \"$id\": \"#/items/properties/name\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Name Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"127.0.0.1\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      },",
+							"      \"port\": {",
+							"        \"$id\": \"#/items/properties/port\",",
+							"        \"type\": \"integer\",",
+							"        \"title\": \"The Port Schema\",",
+							"        \"default\": 0,",
+							"        \"examples\": [",
+							"          953",
+							"        ]",
+							"      },",
+							"      \"server_type\": {",
+							"        \"$id\": \"#/items/properties/server_type\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Server_type Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"bind9\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      }",
+							"    }",
+							"  }",
+							"}",
+							"",
+							"var serviceReturned = JSON.parse(responseBody);",
+							"tests[\"Returned data is valid\"] = tv4.validate(serviceReturned, serviceSchema);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8000/api/v1/service/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token a02640d0bcd8888ae8436f56253784581da125e8",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "port",
+							"value": "53",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "127.0.0.1",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "path",
+							"value": "/tmp/1.db",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": "List services (GET)"
+			},
+			"response": []
+		},
+		{
+			"name": "List all zones",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var zoneSchema = {",
+							"  \"definitions\": {},",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",",
+							"  \"$id\": \"http://example.com/root.json\",",
+							"  \"type\": \"array\",",
+							"  \"title\": \"The Root Schema\",",
+							"  \"items\": {",
+							"    \"$id\": \"#/items\",",
+							"    \"type\": \"object\",",
+							"    \"title\": \"The Items Schema\",",
+							"    \"required\": [",
+							"      \"zone_id\",",
+							"      \"path_file\",",
+							"      \"zone_name\",",
+							"      \"zone_type\",",
+							"      \"zone_text\",",
+							"      \"service\"",
+							"    ],",
+							"    \"properties\": {",
+							"      \"zone_id\": {",
+							"        \"$id\": \"#/items/properties/zone_id\",",
+							"        \"type\": \"integer\",",
+							"        \"title\": \"The Zone_id Schema\",",
+							"        \"default\": 0,",
+							"        \"examples\": [",
+							"          2",
+							"        ]",
+							"      },",
+							"      \"path_file\": {",
+							"        \"$id\": \"#/items/properties/path_file\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Path_file Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost.zone\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      },",
+							"      \"zone_name\": {",
+							"        \"$id\": \"#/items/properties/zone_name\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Zone_name Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"localhost\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      },",
+							"      \"zone_type\": {",
+							"        \"$id\": \"#/items/properties/zone_type\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Zone_type Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"FWD\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      },",
+							"      \"zone_text\": {",
+							"        \"$id\": \"#/items/properties/zone_text\",",
+							"        \"type\": \"string\",",
+							"        \"title\": \"The Zone_text Schema\",",
+							"        \"default\": \"\",",
+							"        \"examples\": [",
+							"          \"@ 604800 IN SOA @ root 2018111410 604800 86400 2419200 604800\\n@ 604800 IN NS @\\n@ 604800 IN A 127.0.0.1\\n@ 604800 IN AAAA ::1\\ntest 604800 IN A 127.0.1.1\\ntest2 604800 IN A 127.0.1.2\\ntest22 0 IN A 127.0.1.22\\ntest226 3600 IN A 127.0.2.26\\ntest33 0 IN A 127.0.1.33\\ntest333 604800 IN A 127.0.33.33\\ntest336 3600 IN A 127.0.3.36\\ntest35 604800 IN A 127.0.1.35\\ntest36 3600 IN A 127.0.1.36\\ntest44 0 IN A 127.0.1.44\\ntest5 0 IN A 127.1.1.1\\ntest55 604800 IN A 127.0.1.55\\ntest63 604800 IN A 127.0.1.63\\ntest66 0 IN A 127.1.1.12\\n\"",
+							"        ],",
+							"        \"pattern\": \"^(.*)$\"",
+							"      },",
+							"      \"service\": {",
+							"        \"$id\": \"#/items/properties/service\",",
+							"        \"type\": \"integer\",",
+							"        \"title\": \"The Service Schema\",",
+							"        \"default\": 0,",
+							"        \"examples\": [",
+							"          1",
+							"        ]",
+							"      }",
+							"    }",
+							"  }",
+							"}",
+							"",
+							"",
+							"",
+							"var zoneReturned = JSON.parse(responseBody);",
+							"tests[\"Returned data is valid\"] = tv4.validate(zoneReturned, zoneSchema);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8000/api/v1/zone/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token a02640d0bcd8888ae8436f56253784581da125e8",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "port",
+							"value": "53",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "127.0.0.1",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "path",
+							"value": "/tmp/1.db",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": "List zones (GET)"
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,25 @@
+version: "3"
+services:
+   dns:
+     build:
+       context: .
+       dockerfile: DockerFile
+     ports:
+       - "53:53/udp"
+       - "53:53"
+       - "56:56"
+       - "953:953"
+     expose:
+       - "53"
+     volumes:
+       - ./conf/:/etc/bind/
+     networks:
+       default:
+         ipv4_address: 172.15.0.2
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.15.0.0/24

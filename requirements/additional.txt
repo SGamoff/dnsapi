@@ -1,0 +1,2 @@
+flake8==3.6.0
+django-rest-swagger==2.2.0

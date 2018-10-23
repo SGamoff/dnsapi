@@ -152,6 +152,9 @@ fabric.properties
 
 # Custom
 data/
+dnsapi/dnsapi/db.sqlite3
+dnsapi/dnsapi/settings/secret.py
+
 
 # VSCode
 .vscode/*
