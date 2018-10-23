@@ -1,0 +1,17 @@
+version: "3"
+services:
+   dns:
+     build:
+       context: .
+       dockerfile: DockerFile
+     ports:
+       - "53:53/udp"
+       - "53:53"
+       - "56:56"
+     expose:
+       - "53"
+     volumes:
+       - ./conf/named.conf:/etc/bind/named.conf
+       - ./conf/rndc.conf:/etc/bind/rndc.conf
+       - ./conf/localhost.zone:/etc/bind/localhost.zone
+       - ./conf/127.zone:/etc/bind/127.zone
