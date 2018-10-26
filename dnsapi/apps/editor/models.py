@@ -3,8 +3,7 @@ from django.db import models
 # from django.urls import reverse
 
 
-from apps.editor.emums import RecordClassTypes, \
-     RecordResourceTypes, ZoneTypes, ServerTypes
+from apps.editor.emums import ZoneTypes, ServerTypes
 
 # Create your models here.
 
@@ -25,20 +24,9 @@ class Zone(models.Model):
     zone_name = models.CharField(default='None', primary_key=True, max_length=255)
     zone_type = models.CharField(default=ZoneTypes.FWD,
         choices = ZoneTypes.Choices, max_length=8, verbose_name='Type zone')
+    zone_text = models.TextField(verbose_name="Text zone view", blank=True)
     service = models.ForeignKey(Service, on_delete=models.CASCADE,
         null=False, blank=False, verbose_name='Server')
 
     def __str__(self):
-        return self.zone_name
-
-
-class RR(models.Model):
-    recordName = models.CharField(default='', max_length=255, verbose_name='Record Name')
-    textData = models.TextField(default='', verbose_name='Record Data')
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Zone')
-
-    def __str__(self):
-        return self.recorddata
-
-
-
+        return "{} {}".format(self.zone_name, self.zone_type)

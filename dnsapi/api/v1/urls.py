@@ -14,11 +14,6 @@ urlpatterns = [
     path('zone/update', ZoneUpdateView.as_view(), name='zoneUpdate'),
     path('zone/retrieve', ZoneRetrieveView.as_view(), name='zoneRetrieve'),
     path('zone/del', ZoneDestroyView.as_view(), name='zoneDel'),
-    path('rr/list', RRListView.as_view(), name='rrList'),
-    path('rr/add', RRCreateView.as_view(), name='rrAdd'),
-    path('rr/update', RRUpdateView.as_view(), name='rrUpdate'),
-    path('rr/retrieve', RRRetrieveView.as_view(), name='rrRetrieve'),
-    path('rr/del', RRDestroyView.as_view(), name='rrDel'),
     path('zone/load', load_zone_file, name="zoneLoad"),
     path('zone/export', export_zone, name='zoneExport'),
 ]

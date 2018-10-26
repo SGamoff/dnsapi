@@ -1,8 +1,9 @@
 import dns.zone
 import dns.ipv4
+import sys
 
-from apps.editor.models import Service, Zone, RR
-from apps.editor.serializers import ServiceSerilializers, ZoneSerilializers, RRSerilializers
+from apps.editor.models import Service, Zone
+from apps.editor.serializers import ServiceSerilializers, ZoneSerilializers
 from dns.exception import  DNSException
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import api_view
@@ -61,31 +62,6 @@ class ZoneDestroyView(DestroyAPIView):
     serializer_class = ZoneSerilializers
 
 
-class RRListView(ListAPIView):
-    queryset = RR.objects.all()
-    serializer_class = RRSerilializers
-
-
-class RRCreateView(CreateAPIView):
-    queryset = RR.objects.all()
-    serializer_class = RRSerilializers
-
-
-class RRUpdateView(UpdateAPIView):
-    queryset = RR.objects.all()
-    serializer_class = RRSerilializers
-
-
-class RRRetrieveView(RetrieveAPIView):
-    queryset = RR.objects.all()
-    serializer_class = RRSerilializers
-
-
-class RRDestroyView(DestroyAPIView):
-    queryset = RR.objects.all()
-    serializer_class = RRSerilializers
-
-
 @api_view(['GET'])
 def load_zone_file(request):
     if request.method == "GET":
@@ -108,18 +84,30 @@ class ZoneOperations():
         self.zone_name = zone_name
 
     def read_zone_from_txt(self):
+        """
+        load zone from bind format file in DB if need update
+        :return:
+        result: str
+        """
         try:
-            findRR = RR.objects.filter(zone__exact=self.zone_name)
-            # Clean all records before import from txt DANGEROUS
-            if findRR.count() > 0:
-                findRR.delete()
             zone = dns.zone.from_file(self.path, self.zone_name)
             findZone = Zone.objects.get(zone_name__exact=self.zone_name)
             result = ""
-            for name, node in zone.nodes.items():
-                for rdataset in node.rdatasets:
-                    NewRR = RR.objects.create(recordName=name, textData=rdataset.to_text(), zone=findZone)
-                    NewRR.save()
+            reload_zone_to_db = True
+            if len(findZone.zone_text) > 0:
+                # return findZone.zone_text
+                oldzone = dns.zone.from_text(findZone.zone_text.replace("\r",""),self.zone_name)
+                if oldzone == zone:
+                    result = "Update zone success! Nothing to do"
+                    reload_zone_to_db = False
+                else:
+                    findZone.zone_text=""
+            if reload_zone_to_db:
+                with open(self.path,"r") as f:
+                    lines = f.read()
+                    findZone.zone_text = lines
+                    findZone.save()
+                result = "New zone has been loaded!"
             return result
         except DNSException as e:
             return e.msg
@@ -127,18 +115,24 @@ class ZoneOperations():
             return e.msg
 
     def export_zone_to_txt(self):
+        """
+        export zone from database if was changed
+        :return:
+        result: str
+        """
         try:
-            findRR = RR.objects.filter(zone__exact=self.zone_name)
-            if findRR.count()==0:
-                return "Records not exists"
-            exZone = dns.zone.Zone(self.zone_name)
-            exNode = exZone.find_node(self.zone_name,True)
-            newRdataset = exNode.rdatasets
-            for rr in findRR:
-                newRdataset.Rdataset.add(exZone, rr.textData)
-
-                # newZone = exZone.find_node(rr.recordName,True)
-                # newZone.get_rdataset(newRR.rdclass, newRR.rdtype, newRR.rdata, True)
-            exZone.to_file(self.path)
+            oldZone = dns.zone.from_file(self.path, self.zone_name)
+            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
+            result = ""
+            if len(findZone.zone_text) > 0:
+                newZone = dns.zone.from_text(findZone.zone_text.replace("\r",""), self.zone_name)
+                if oldZone == newZone:
+                    result = "Nothing export to file"
+                else:
+                    newZone.to_file(self.path)
+                    result = "Zone has been exported to file"
+            return result
         except DNSException as e:
+            return e.msg
+        except OSError as e:
             return e.msg
