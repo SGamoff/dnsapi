@@ -17,4 +17,4 @@ class ZoneSerilializers(serializers.ModelSerializer):
 class RRSerilializers(serializers.ModelSerializer):
     class Meta:
         model = RR
-        fields = ("name", "ttl", "rc", "rr", "rd", "zone")
+        fields = ("recordName", "textData", "zone")

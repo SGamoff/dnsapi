@@ -33,15 +33,12 @@ class Zone(models.Model):
 
 
 class RR(models.Model):
-    name = models.CharField(default='', max_length=255, verbose_name='Name')
-    ttl = models.PositiveIntegerField(default=0, null=True, verbose_name='TTL')
-    rc = models.CharField(default=RecordClassTypes.IN,
-         choices=RecordClassTypes.Choices, max_length=2, verbose_name='Resource Class')
-    rr = models.CharField(default=RecordResourceTypes.A,
-         choices=RecordResourceTypes.Choices, max_length=5, verbose_name='Resource Record')
-    rd = models.CharField(null=False, max_length=4096, verbose_name='Resource Data')
+    recordName = models.CharField(default='', max_length=255, verbose_name='Record Name')
+    textData = models.TextField(default='', verbose_name='Record Data')
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Zone')
 
     def __str__(self):
-        return self.name
+        return self.recorddata
+
+
 

@@ -19,5 +19,7 @@ urlpatterns = [
     path('rr/update', RRUpdateView.as_view(), name='rrUpdate'),
     path('rr/retrieve', RRRetrieveView.as_view(), name='rrRetrieve'),
     path('rr/del', RRDestroyView.as_view(), name='rrDel'),
+    path('zone/load', load_zone_file, name="zoneLoad"),
+    path('zone/export', export_zone, name='zoneExport'),
 ]
 

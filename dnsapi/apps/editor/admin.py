@@ -7,7 +7,7 @@ from apps.editor.models import Zone, Service, RR
 
 @admin.register(RR)
 class RRAdmin(admin.ModelAdmin):
-    list_display = ('name', 'ttl', 'rc', 'rr', 'rd')
+    list_display = ('recordName', 'textData')
 
     class Meta:
         model = RR
@@ -15,7 +15,7 @@ class RRAdmin(admin.ModelAdmin):
 
 @admin.register(Zone)
 class ZoneAdmin(admin.ModelAdmin):
-    list_display = ('path_file', 'zone_type', 'service')
+    list_display = ('zone_name', 'path_file', 'zone_type', 'service')
 
     class Meta:
         model = Zone
