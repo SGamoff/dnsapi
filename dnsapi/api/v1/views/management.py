@@ -71,7 +71,7 @@ class ZoneExportByID(APIView):
         return Response({"message": str(zoneExport.export_zone_to_txt())})
 
 
-class ZoneAddResourceRecord(APIView):
+class ZoneResourceRecord(APIView):
 
     def get_object(self, pk):
         try:
@@ -79,21 +79,12 @@ class ZoneAddResourceRecord(APIView):
         except Zone.DoesNotExist:
             raise Http404
 
-    def post(self, request, pk):
+    def put(self, request, pk):
         zoneObj = self.get_object(pk)
         ZoneAddRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
         return Response({"message": str(ZoneAddRR.add_resource_record(request))})
 
-
-class ZoneDelResourceRecord(APIView):
-
-    def get_object(self, pk):
-        try:
-            return Zone.objects.get(service = pk)
-        except Zone.DoesNotExist:
-            raise Http404
-
-    def post(self, request, pk):
+    def delete(self, request, pk):
         zoneObj = self.get_object(pk)
         ZoneDeleteRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
         return Response({"message": str(ZoneDeleteRR.del_resource_record(request))})
@@ -131,30 +122,6 @@ class ZoneRetrieveView(RetrieveAPIView):
 class ZoneDestroyView(DestroyAPIView):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerilializers
-
-#
-# @api_view(['GET'])
-# def load_zone_file(request):
-#     if request.method == "GET":
-#         get_zone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost.zone", "localhost")
-#         return Response({"message": str(get_zone.read_zone_from_txt())})
-#     Response({"message": "Only GET method supported"})
-#
-#
-# @api_view(['GET'])
-# def export_zone(request):
-#     if request.method == "GET":
-#         set_zone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost1.zone","localhost")
-#         return Response({"message": str(set_zone.export_zone_to_txt())})
-#     Response({"message": "Only GET method supported"})
-#
-#
-# @api_view(['POST'])
-# def addrecord_zone(request):
-#     if request.method == 'POST':
-#         setZone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost1.zone","localhost")
-#         return Response({"message": str(setZone.add_resource_record({"rtype": "A"}))})
-
 
 class ZoneOperations():
 
