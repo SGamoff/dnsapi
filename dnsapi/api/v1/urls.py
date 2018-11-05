@@ -1,5 +1,6 @@
 from api.v1.views.management import *
 from django.urls import path
+from rest_framework import routers
 
 app_name = 'v1'
 
