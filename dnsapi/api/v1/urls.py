@@ -10,11 +10,16 @@ urlpatterns = [
     path('service/retrieve', ServiceRetrieveView.as_view(), name='serviceRetrieve'),
     path('service/del', ServiceDestroyView.as_view(), name='serviceDel'),
     path('zone/list', ZoneListView.as_view(), name='zoneList'),
+    path('zone/<int:pk>/import', ZoneImportByID.as_view(), name='zoneImportId'),
+    path('zone/<int:pk>/export', ZoneExportByID.as_view(), name='zoneExportId'),
+    path('zone/getbyname/<str:pk>', ZoneDetailView.as_view(), name='zoneListId'),
     path('zone/add', ZoneCreateView.as_view(), name='zoneAdd'),
     path('zone/update', ZoneUpdateView.as_view(), name='zoneUpdate'),
     path('zone/retrieve', ZoneRetrieveView.as_view(), name='zoneRetrieve'),
     path('zone/del', ZoneDestroyView.as_view(), name='zoneDel'),
-    path('zone/load', load_zone_file, name="zoneLoad"),
-    path('zone/export', export_zone, name='zoneExport'),
+    # path('zone/import', load_zone_file, name="zoneImport"),
+    # path('zone/export', export_zone, name='zoneExport'),
+    path('zone/<int:pk>/addRR', ZoneAddResourceRecord.as_view(), name='zoneAddRR'),
+    path('zone/<int:pk>/delRR', ZoneDelResourceRecord.as_view(), name='zoneDelRR'),
 ]
 

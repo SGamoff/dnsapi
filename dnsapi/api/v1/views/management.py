@@ -1,14 +1,15 @@
 import dns.zone
 import dns.ipv4
-import sys
 
 from apps.editor.models import Service, Zone
 from apps.editor.serializers import ServiceSerilializers, ZoneSerilializers
+from datetime import date
 from dns.exception import  DNSException
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.decorators import api_view
+from django.http import Http404
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, \
         RetrieveAPIView, DestroyAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
@@ -38,8 +39,78 @@ class ServiceDestroyView(DestroyAPIView):
 
 
 class ZoneListView(ListAPIView):
+
     queryset = Zone.objects.all()
     serializer_class = ZoneSerilializers
+
+
+class ZoneImportByID(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Zone.objects.get(service = pk)
+        except Zone.DoesNotExist:
+            raise Http404
+
+    def post(self,request, pk):
+        zoneObj = self.get_object(pk)
+        zoneImport = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
+        return Response({"message": str(zoneImport.read_zone_from_txt())})
+
+class ZoneExportByID(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Zone.objects.get(service = pk)
+        except Zone.DoesNotExist:
+            raise Http404
+
+    def post(self,request, pk):
+        zoneObj = self.get_object(pk)
+        zoneExport = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
+        return Response({"message": str(zoneExport.export_zone_to_txt())})
+
+
+class ZoneAddResourceRecord(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Zone.objects.get(service = pk)
+        except Zone.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk):
+        zoneObj = self.get_object(pk)
+        ZoneAddRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
+        return Response({"message": str(ZoneAddRR.add_resource_record(request))})
+
+
+class ZoneDelResourceRecord(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Zone.objects.get(service = pk)
+        except Zone.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk):
+        zoneObj = self.get_object(pk)
+        ZoneDeleteRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
+        return Response({"message": str(ZoneDeleteRR.del_resource_record(request))})
+
+
+class ZoneDetailView(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Zone.objects.get(zone_name__exact = pk)
+        except Zone.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        zone = self.get_object(pk)
+        serializer = ZoneSerilializers(zone)
+        return Response(serializer.data)
 
 
 class ZoneCreateView(CreateAPIView):
@@ -61,20 +132,28 @@ class ZoneDestroyView(DestroyAPIView):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerilializers
 
-
-@api_view(['GET'])
-def load_zone_file(request):
-    if request.method == "GET":
-        getZone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost.zone", "localhost")
-        return Response({"message": str(getZone.read_zone_from_txt())})
-    Response({"message": "Only GET method supported"})
-
-@api_view(['GET'])
-def export_zone(request):
-    if request.method == "GET":
-        setZone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost1.zone","localhost")
-        return Response({"message": str(setZone.export_zone_to_txt())})
-    Response({"message": "Only GET method supported"})
+#
+# @api_view(['GET'])
+# def load_zone_file(request):
+#     if request.method == "GET":
+#         get_zone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost.zone", "localhost")
+#         return Response({"message": str(get_zone.read_zone_from_txt())})
+#     Response({"message": "Only GET method supported"})
+#
+#
+# @api_view(['GET'])
+# def export_zone(request):
+#     if request.method == "GET":
+#         set_zone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost1.zone","localhost")
+#         return Response({"message": str(set_zone.export_zone_to_txt())})
+#     Response({"message": "Only GET method supported"})
+#
+#
+# @api_view(['POST'])
+# def addrecord_zone(request):
+#     if request.method == 'POST':
+#         setZone = ZoneOperations("/home/gsv/PycharmProjects/dnsapi/docker/conf/localhost1.zone","localhost")
+#         return Response({"message": str(setZone.add_resource_record({"rtype": "A"}))})
 
 
 class ZoneOperations():
@@ -136,3 +215,72 @@ class ZoneOperations():
             return e.msg
         except OSError as e:
             return e.msg
+
+    def add_resource_record(self, request):
+        result = ""
+        try:
+            # result = dns.rdatatype.from_text(request.data.get("rrtype"))
+            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
+            if len(findZone.zone_text) > 0:
+                modZone = dns.zone.from_text(findZone.zone_text.replace("\r", ""), self.zone_name)
+            default_ttl = dns.ttl.from_text("0")
+            for (name, ttl, rdata) in modZone.iterate_rdatas('SOA'):
+                serial = self._generate_serial(rdata.serial)
+                default_ttl = str(ttl)
+                rdata.serial = serial
+            rrttl = dns.ttl.from_text(request.data.get("rrttl", default_ttl))
+            rrtype = dns.rdatatype.from_text(request.data.get("rrtype"))
+            originname = dns.name.from_text(self.zone_name)
+            rrname = dns.name.from_text(request.data.get("rrname", "@"), originname)
+            rrclass = dns.rdataclass.from_text(request.data.get("rrclass", "IN"))
+            rrdataset = modZone.find_rdataset(rrname, rrtype, create=True)
+            rrtext = request.data.get("rrtext", None)
+            rrdata = dns.rdata.from_text(rrclass, rrtype, rrtext)
+            rrdataset.add(rrdata, rrttl)
+            findZone.zone_text = modZone.to_text().decode('utf-8')
+            findZone.save()
+            result = "Zone with serial number {} was created".format(serial)
+        except DNSException as e:
+            return e.msg
+        return result
+
+    def del_resource_record(self, request):
+        result = ""
+        try:
+            # result = dns.rdatatype.from_text(request.data.get("rrtype"))
+            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
+            if len(findZone.zone_text) > 0:
+                modZone = dns.zone.from_text(findZone.zone_text.replace("\r", ""), self.zone_name)
+            default_ttl = dns.ttl.from_text("0")
+            for (name, ttl, rdata) in modZone.iterate_rdatas('SOA'):
+                serial = self._generate_serial(rdata.serial)
+                default_ttl = str(ttl)
+                rdata.serial = serial
+            rrttl = dns.ttl.from_text(request.data.get("rrttl", default_ttl))
+            rrtype = dns.rdatatype.from_text(request.data.get("rrtype"))
+            originname = dns.name.from_text(self.zone_name)
+            rrname = dns.name.from_text(request.data.get("rrname", "@"), originname)
+            rrclass = dns.rdataclass.from_text(request.data.get("rrclass", "IN"))
+            rrdataset = modZone.find_rdataset(rrname, rrtype, create=True)
+            rrtext = request.data.get("rrtext", None)
+            rrdata = dns.rdata.from_text(rrclass, rrtype, rrtext)
+            rrdataset.add(rrdata, rrttl)
+            findZone.zone_text = modZone.to_text().decode('utf-8')
+            findZone.save()
+            result = "Zone with serial number {} was created".format(serial)
+        except DNSException as e:
+            return e.msg
+        return result
+
+    def _generate_serial(self, oldserial):
+        newserial = date.today().strftime("%Y%m%d")
+        oldserial = str(oldserial)
+        if len(oldserial) < 10 or len(oldserial) != 10 or oldserial[:8] != newserial:
+            newserial += "01"
+        elif oldserial[:8] == newserial:
+            delta = str(int(oldserial[-2::]) + 1)
+            if len(delta) < 2:
+                delta = "0" + delta
+            newserial = oldserial[:8] + delta
+        return int(newserial)
+    # def del_resource_record(self, request):

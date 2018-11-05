@@ -1,4 +1,4 @@
-from .base import *
+from dnsapi.settings.base import *
 
 DEBUG = True
 
