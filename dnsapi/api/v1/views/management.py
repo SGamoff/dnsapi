@@ -247,27 +247,19 @@ class ZoneOperations():
     def del_resource_record(self, request):
         result = ""
         try:
-            # result = dns.rdatatype.from_text(request.data.get("rrtype"))
             findZone = Zone.objects.get(zone_name__exact=self.zone_name)
             if len(findZone.zone_text) > 0:
                 modZone = dns.zone.from_text(findZone.zone_text.replace("\r", ""), self.zone_name)
-            default_ttl = dns.ttl.from_text("0")
             for (name, ttl, rdata) in modZone.iterate_rdatas('SOA'):
                 serial = self._generate_serial(rdata.serial)
-                default_ttl = str(ttl)
                 rdata.serial = serial
-            rrttl = dns.ttl.from_text(request.data.get("rrttl", default_ttl))
             rrtype = dns.rdatatype.from_text(request.data.get("rrtype"))
             originname = dns.name.from_text(self.zone_name)
             rrname = dns.name.from_text(request.data.get("rrname", "@"), originname)
-            rrclass = dns.rdataclass.from_text(request.data.get("rrclass", "IN"))
-            rrdataset = modZone.find_rdataset(rrname, rrtype, create=True)
-            rrtext = request.data.get("rrtext", None)
-            rrdata = dns.rdata.from_text(rrclass, rrtype, rrtext)
-            rrdataset.add(rrdata, rrttl)
+            modZone.delete_rdataset(rrname, rrtype)
             findZone.zone_text = modZone.to_text().decode('utf-8')
             findZone.save()
-            result = "Zone with serial number {} was created".format(serial)
+            result = "Zone with serial number {} was updated".format(serial)
         except DNSException as e:
             return e.msg
         return result
