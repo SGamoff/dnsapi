@@ -20,8 +20,9 @@ class Service(models.Model):
 
 
 class Zone(models.Model):
+    zone_id = models.AutoField(primary_key=True)
     path_file = models.CharField(max_length=4096, verbose_name='Zone file path')
-    zone_name = models.CharField(default='None', primary_key=True, max_length=255)
+    zone_name = models.CharField(default='None', unique=True, max_length=255)
     zone_type = models.CharField(default=ZoneTypes.FWD,
         choices = ZoneTypes.Choices, max_length=8, verbose_name='Type zone')
     zone_text = models.TextField(verbose_name="Text zone view", blank=True)
