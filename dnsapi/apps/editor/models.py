@@ -1,11 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-# from django.urls import reverse
 
 
 from apps.editor.emums import ZoneTypes, ServerTypes
-
-# Create your models here.
 
 
 class Service(models.Model):

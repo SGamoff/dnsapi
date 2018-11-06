@@ -7,140 +7,94 @@ from datetime import date
 from dns.exception import DNSException
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets
 
 
-class ServiceView(APIView):
-
-    def get(self, request, format=None):
-        services = Service.objects.all()
-        serializer = ServiceSerilializers(services, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = ServiceSerilializers(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ServiceView(viewsets.ModelViewSet):
+    """
+    A router for API Service GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+    """
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerilializers
 
 
-class ServiceIdView(APIView):
-
-    def get(self, request, pk,format=None):
-        services = Service.objects.get(id=pk)
-        serializer = ServiceSerilializers(services)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        service_id = Service.objects.get(id=pk)
-        serializer = ServiceSerilializers(service_id, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        service_id = Service.objects.get(id=pk)
-        service_id.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ZoneView(APIView):
-
-    def get(self, request, format=None):
-        zones = Zone.objects.all()
-        serializer = ZoneSerilializers(zones, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = ZoneSerilializers(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ZoneIdView(APIView):
-
-    def get(self, request, pk,format=None):
-        zones = Zone.objects.get(zone_id=pk)
-        serializer = ZoneSerilializers(zones)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        zone_id = Zone.objects.get(zone_id=pk)
-        serializer = ZoneSerilializers(zone_id, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        zone_id = Zone.objects.get(zone_id=pk)
-        zone_id.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ZoneView(viewsets.ModelViewSet):
+    """
+    A router for API Zone GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+    """
+    queryset = Zone.objects.all()
+    serializer_class = ZoneSerilializers
 
 
 class ZoneImportByID(APIView):
-
-    def get_object(self, pk):
+    """
+    A router for API Zone import by ID POST
+    """
+    @staticmethod
+    def get_object(pk):
         try:
-            return Zone.objects.get(zone_id = pk)
+            return Zone.objects.get(zone_id=pk)
         except Zone.DoesNotExist:
             raise Http404
 
-    def post(self,request, pk):
-        zoneObj = self.get_object(pk)
-        zoneImport = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
-        return Response({"message": str(zoneImport.read_zone_from_txt())})
+    def post(self, request, pk):
+        zone_obj = self.get_object(pk)
+        zone_import = ZoneOperations(zone_obj.path_file, zone_obj.zone_name)
+        return Response({"message": str(zone_import.read_zone_from_txt())})
 
 
 class ZoneExportByID(APIView):
-
-    def get_object(self, pk):
+    """
+    A router for API Zone export by ID POST
+    """
+    @staticmethod
+    def get_object(pk):
         try:
-            return Zone.objects.get(zone_id = pk)
+            return Zone.objects.get(zone_id=pk)
         except Zone.DoesNotExist:
             raise Http404
 
-    def post(self,request, pk):
-        zoneObj = self.get_object(pk)
-        zoneExport = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
-        return Response({"message": str(zoneExport.export_zone_to_txt())})
+    def post(self, request, pk):
+        zone_obj = self.get_object(pk)
+        zone_export = ZoneOperations(zone_obj.path_file, zone_obj.zone_name)
+        return Response({"message": str(zone_export.export_zone_to_txt())})
 
 
 class ZoneResourceRecord(APIView):
-
-    def get_object(self, pk):
+    """
+    A router for API Zone resource records operations by zone ID POST
+    """
+    @staticmethod
+    def get_object(pk):
         try:
-            return Zone.objects.get(zone_id = pk)
+            return Zone.objects.get(zone_id=pk)
         except Zone.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
-        RRtext = self.get_object(pk)
-        return Response(str(RRtext.zone_text).decode('utf-8'))
+        rr_text = self.get_object(pk)
+        find_record = ResourceRecordOperations(rr_text.zone_id)
+        return Response(str(find_record.find_and_return_records()))
 
     def put(self, request, pk):
-        zoneObj = self.get_object(pk)
-        ZoneAddRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
-        return Response({"message": str(ZoneAddRR.add_resource_record(request))})
+        zone_obj = self.get_object(pk)
+        zone_add_rr = ZoneOperations(zone_obj.path_file, zone_obj.zone_name)
+        return Response({"message": str(zone_add_rr.add_resource_record(request))})
 
-    def destroy(self, request, pk):
+    def post(self, request, pk):
         zoneObj = self.get_object(pk)
         ZoneDeleteRR = ZoneOperations(zoneObj.path_file, zoneObj.zone_name)
         return Response({"message": str(ZoneDeleteRR.del_resource_record(request))})
 
 
 class ZoneDetailView(APIView):
-
-    def get_object(self, pk):
+    @staticmethod
+    def get_object(pk):
         try:
-            return Zone.objects.get(zone_name__exact = pk)
+            return Zone.objects.get(zone_name__exact=pk)
         except Zone.DoesNotExist:
             raise Http404
 
@@ -164,28 +118,28 @@ class ZoneOperations():
         """
         try:
             zone = dns.zone.from_file(self.path, self.zone_name)
-            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
+            find_zone = Zone.objects.get(zone_name__exact=self.zone_name)
             result = ""
             reload_zone_to_db = True
-            if len(findZone.zone_text) > 0:
+            if len(find_zone.zone_text) > 0:
                 # return findZone.zone_text
-                oldzone = dns.zone.from_text(findZone.zone_text.replace("\r",""),self.zone_name)
-                if oldzone == zone:
+                old_zone = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), self.zone_name)
+                if old_zone == zone:
                     result = "Update zone success! Nothing to do"
                     reload_zone_to_db = False
                 else:
-                    findZone.zone_text=""
+                    find_zone.zone_text = ""
             if reload_zone_to_db:
-                with open(self.path,"r") as f:
+                with open(self.path, "r") as f:
                     lines = f.read()
-                    findZone.zone_text = lines
-                    findZone.save()
+                    find_zone.zone_text = lines
+                    find_zone.save()
                 result = "New zone has been loaded!"
             return result
         except DNSException as e:
             return e.msg
         except ObjectDoesNotExist as e:
-            return e.msg
+            return e
 
     def export_zone_to_txt(self):
         """
@@ -194,43 +148,45 @@ class ZoneOperations():
         result: str
         """
         try:
-            oldZone = dns.zone.from_file(self.path, self.zone_name)
-            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
+            old_zone = dns.zone.from_file(self.path, self.zone_name)
+            find_zone = Zone.objects.get(zone_name__exact=self.zone_name)
             result = ""
-            if len(findZone.zone_text) > 0:
-                newZone = dns.zone.from_text(findZone.zone_text.replace("\r",""), self.zone_name)
-                if oldZone == newZone:
+            if len(find_zone.zone_text) > 0:
+                new_zone = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), self.zone_name)
+                if old_zone == new_zone:
                     result = "Nothing export to file"
                 else:
-                    newZone.to_file(self.path)
+                    new_zone.to_file(self.path)
                     result = "Zone has been exported to file"
             return result
         except DNSException as e:
             return e.msg
         except OSError as e:
-            return e.msg
+            return e
 
     def add_resource_record(self, request):
         try:
-            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
-            if len(findZone.zone_text) > 0:
-                modZone = dns.zone.from_text(findZone.zone_text.replace("\r", ""), self.zone_name)
+            find_zone = Zone.objects.get(zone_name__exact=self.zone_name)
+            mod_zone = ''
+            serial = ''
+            if len(find_zone.zone_text) > 0:
+                mod_zone = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), self.zone_name)
             default_ttl = dns.ttl.from_text("0")
-            for (name, ttl, rdata) in modZone.iterate_rdatas('SOA'):
+            for (name, ttl, rdata) in mod_zone.iterate_rdatas('SOA'):
                 serial = self._generate_serial(rdata.serial)
                 default_ttl = str(ttl)
                 rdata.serial = serial
-            rrttl = dns.ttl.from_text(request.data.get("rrttl", default_ttl))
-            rrtype = dns.rdatatype.from_text(request.data.get("rrtype"))
-            originname = dns.name.from_text(self.zone_name)
-            rrname = dns.name.from_text(request.data.get("rrname", "@"), originname)
-            rrclass = dns.rdataclass.from_text(request.data.get("rrclass", "IN"))
-            rrdataset = modZone.find_rdataset(rrname, rrtype, create=True)
-            rrtext = request.data.get("rrtext", None)
-            rrdata = dns.rdata.from_text(rrclass, rrtype, rrtext)
-            rrdataset.add(rrdata, rrttl)
-            findZone.zone_text = modZone.to_text().decode('utf-8')
-            findZone.save()
+            rr_ttl = dns.ttl.from_text(request.data.get("rrttl", default_ttl))
+            rr_type = dns.rdatatype.from_text(request.data.get("rrtype"))
+            origin_name = dns.name.from_text(self.zone_name)
+            rr_name = dns.name.from_text(request.data.get("rrname", "@"), origin_name)
+            rr_class = dns.rdataclass.from_text(request.data.get("rrclass", "IN"))
+            rr_dataset = mod_zone.find_rdataset(rr_name, rr_type, create=True)
+            rr_text = request.data.get("rrtext", None)
+            rr_data = dns.rdata.from_text(rr_class, rr_type, rr_text)
+            rr_dataset.add(rr_data, rr_ttl)
+            find_zone.zone_text = mod_zone.to_text().decode('utf-8')
+            find_zone.save()
             result = "Zone with serial number {} was created".format(serial)
         except DNSException as e:
             return e.msg
@@ -239,31 +195,54 @@ class ZoneOperations():
     def del_resource_record(self, request):
         result = ""
         try:
-            findZone = Zone.objects.get(zone_name__exact=self.zone_name)
-            if len(findZone.zone_text) > 0:
-                modZone = dns.zone.from_text(findZone.zone_text.replace("\r", ""), self.zone_name)
-            for (name, ttl, rdata) in modZone.iterate_rdatas('SOA'):
+            find_zone = Zone.objects.get(zone_name__exact=self.zone_name)
+            mod_zone = ''
+            serial = ''
+            if len(find_zone.zone_text) > 0:
+                mod_zone = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), self.zone_name)
+            for (name, ttl, rdata) in mod_zone.iterate_rdatas('SOA'):
                 serial = self._generate_serial(rdata.serial)
                 rdata.serial = serial
-            rrtype = dns.rdatatype.from_text(request.data.get("rrtype"))
-            originname = dns.name.from_text(self.zone_name)
-            rrname = dns.name.from_text(request.data.get("rrname", "@"), originname)
-            modZone.delete_rdataset(rrname, rrtype)
-            findZone.zone_text = modZone.to_text().decode('utf-8')
-            findZone.save()
+            rr_type = dns.rdatatype.from_text(request.data.get("rrtype"))
+            origin_name = dns.name.from_text(self.zone_name)
+            rr_name = dns.name.from_text(request.data.get("rrname", "@"), origin_name)
+            mod_zone.delete_rdataset(rr_name, rr_type)
+            find_zone.zone_text = mod_zone.to_text().decode('utf-8')
+            find_zone.save()
             result = "Zone with serial number {} was updated".format(serial)
         except DNSException as e:
             return e.msg
         return result
 
-    def _generate_serial(self, oldserial):
-        newserial = date.today().strftime("%Y%m%d")
-        oldserial = str(oldserial)
-        if len(oldserial) < 10 or len(oldserial) != 10 or oldserial[:8] != newserial:
-            newserial += "01"
-        elif oldserial[:8] == newserial:
-            delta = str(int(oldserial[-2::]) + 1)
+    @staticmethod
+    def _generate_serial(old_serial):
+        new_serial = date.today().strftime("%Y%m%d")
+        old_serial = str(old_serial)
+        if len(old_serial) < 10 or len(old_serial) != 10 or old_serial[:8] != new_serial:
+            new_serial += "01"
+        elif old_serial[:8] == new_serial:
+            delta = str(int(old_serial[-2::]) + 1)
             if len(delta) < 2:
                 delta = "0" + delta
-            newserial = oldserial[:8] + delta
-        return int(newserial)
+            new_serial = old_serial[:8] + delta
+        return int(new_serial)
+
+
+class ResourceRecordOperations():
+
+    def __init__(self, zone_id):
+        self.zone_id = zone_id
+
+    def find_and_return_records(self):
+        result = {}
+        try:
+            find_zone = Zone.objects.get(zone_id__exact=self.zone_id)
+            zone_rdatasets = ""
+            if len(find_zone.zone_text) > 0:
+                zone_rdatasets = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), find_zone.zone_name)
+            for rr_dataset in zone_rdatasets:
+                for rr_data in rr_dataset:
+                    result[rr_data.decode('utf-8')] = ""
+        except DNSException as e:
+            return e.msg
+        return result
