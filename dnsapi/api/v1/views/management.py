@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
 
@@ -19,6 +20,7 @@ class ServiceView(viewsets.ModelViewSet):
     """
     queryset = Service.objects.all()
     serializer_class = ServiceSerilializers
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class ZoneView(viewsets.ModelViewSet):
@@ -27,12 +29,14 @@ class ZoneView(viewsets.ModelViewSet):
     """
     queryset = Zone.objects.all()
     serializer_class = ZoneSerilializers
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class ZoneImportByID(APIView):
     """
     A router for API Zone import by ID POST
     """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     @staticmethod
     def get_object(pk):
         try:
@@ -50,6 +54,7 @@ class ZoneExportByID(APIView):
     """
     A router for API Zone export by ID POST
     """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     @staticmethod
     def get_object(pk):
         try:
@@ -67,6 +72,7 @@ class ZoneResourceRecord(APIView):
     """
     A router for API Zone resource records operations by zone ID POST
     """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     @staticmethod
     def get_object(pk):
         try:
@@ -91,6 +97,8 @@ class ZoneResourceRecord(APIView):
 
 
 class ZoneDetailView(APIView):
+
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     @staticmethod
     def get_object(pk):
         try:
