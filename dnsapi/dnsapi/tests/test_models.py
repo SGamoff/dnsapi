@@ -1,15 +1,16 @@
-import ipaddress
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from apps.editor.models import Zone, Service
 from apps.editor.emums import ServerTypes, ZoneTypes
 
+
 class ServiceModelTest(TestCase):
 
     @classmethod
     def setUp(self):
-        Service.objects.create(name='1.1.1.1', port='53', server_type=ServerTypes.BIND9)
+        Service.objects.create(name='1.1.1.1',
+                               port='53', server_type=ServerTypes.BIND9.value)
 
     def test_name(self):
         serv = Service.objects.get(id=1)
@@ -17,31 +18,34 @@ class ServiceModelTest(TestCase):
         self.assertEqual(field_name, 'DNS/IP Server')
 
     def test_port_max_value(self):
-        serv = Service(name='test.org', port='65536', server_type=ServerTypes.BIND9)
+        serv = Service(name='test.org',
+                       port='65536', server_type=ServerTypes.BIND9.value)
         with self.assertRaises(ValidationError):
             if serv.full_clean():
                 serv.save()
         self.assertEqual(Service.objects.filter(port='65536').count(), 0)
 
     def test_port_min_value(self):
-        serv = Service(name='test.org', port='0', server_type=ServerTypes.BIND9)
+        serv = Service(name='test.org',
+                       port='0', server_type=ServerTypes.BIND9.value)
         with self.assertRaises(ValidationError):
             if serv.full_clean():
                 serv.save()
         self.assertEqual(Service.objects.filter(port='0').count(), 0)
 
     def test_service_type_enums(self):
-        self.assertEqual(ServerTypes.BIND9, 'bind9')
-
+        self.assertEqual(ServerTypes.BIND9.value, 'bind9')
 
 
 class ZoneModelTest(TestCase):
 
     @classmethod
     def setUp(self):
-        Service.objects.create(name='1.1.1.1', port='53', server_type=ServerTypes.BIND9)
-        Zone.objects.create(path_file='/var/lib/bind/localhost.db', zone_name='localhost', zone_type=ZoneTypes.FWD,
-            service=Service.objects.get(id=1))
+        Service.objects.create(name='1.1.1.1',
+                               port='53', server_type=ServerTypes.BIND9.value)
+        Zone.objects.create(path_file='/var/lib/bind/localhost.db',
+                            zone_name='localhost', zone_type=ZoneTypes.FWD,
+                            service=Service.objects.get(id=1))
 
     def test_name(self):
         zon = Zone.objects.get(zone_id=1)

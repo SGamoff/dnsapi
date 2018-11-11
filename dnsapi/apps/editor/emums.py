@@ -1,17 +1,16 @@
-from django.utils.translation import ugettext_lazy as _
+from enum import Enum
 
-class ZoneTypes:
+
+class ChoiceEnum(Enum):
+    @classmethod
+    def choices(cls):
+        return tuple((x.name, x.value) for x in cls)
+
+
+class ZoneTypes(ChoiceEnum):
     FWD = 'forward'
     RVS = 'reverse'
 
-    Choices = (
-        (FWD, _('forward zone')),
-        (RVS, _('reverse zone')),
-    )
 
-class ServerTypes:
+class ServerTypes(ChoiceEnum):
     BIND9 = 'bind9'
-
-    Choices = (
-        (BIND9, _('Bind 9 DNS server')),
-    )

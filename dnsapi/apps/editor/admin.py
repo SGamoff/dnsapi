@@ -7,7 +7,8 @@ from apps.editor.models import Zone, Service
 
 @admin.register(Zone)
 class ZoneAdmin(admin.ModelAdmin):
-    list_display = ('zone_name', 'path_file', 'zone_type', "zone_text", 'service')
+    list_display = ('zone_name', 'path_file',
+                    'zone_type', "zone_text", 'service')
 
     class Meta:
         model = Zone
