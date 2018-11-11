@@ -7,6 +7,7 @@ from datetime import date
 from dns.exception import DNSException
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from os import stat
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -156,12 +157,14 @@ class ZoneOperations():
         result: str
         """
         try:
-            old_zone = dns.zone.from_file(self.path, self.zone_name)
+            old_zone = ''
+            if stat(self.path).st_size != 0:
+                old_zone = dns.zone.from_file(self.path, self.zone_name)
             find_zone = Zone.objects.get(zone_name__exact=self.zone_name)
             result = ""
             if len(find_zone.zone_text) > 0:
                 new_zone = dns.zone.from_text(find_zone.zone_text.replace("\r", ""), self.zone_name)
-                if old_zone == new_zone:
+                if old_zone == new_zone and old_zone!='':
                     result = "Nothing export to file"
                 else:
                     new_zone.to_file(self.path)
