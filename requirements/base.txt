@@ -3,4 +3,5 @@ django-rest-auth==0.9.3
 djangorestframework==3.9.0
 dnspython==1.15.0
 pytz==2018.7
+ply==3.11
 six==1.11.0

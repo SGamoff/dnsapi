@@ -7,5 +7,7 @@ This soft is used to manage the DNS server using the django REST API
 You need dns service worked and configured on server.
 
 ##### Installation
-Just run `pip install -r requirements/base.txt`. Create database and superuser.
+1. `pip install -r requirements/base.txt`.
+2. `python install requirements/isc/setup.py install` - official module python from https://gitlab.isc.org/isc-projects/bind9.git (folder bin/python)
+3. Create database and superuser.
 

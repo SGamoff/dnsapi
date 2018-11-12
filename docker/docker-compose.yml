@@ -16,3 +16,13 @@ services:
        - ./conf/rndc.conf:/etc/bind/rndc.conf
        - ./conf/localhost.zone:/etc/bind/localhost.zone
        - ./conf/127.zone:/etc/bind/127.zone
+     networks:
+       default:
+         ipv4_address: 172.15.0.2
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.15.0.0/24

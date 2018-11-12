@@ -1,6 +1,6 @@
 from api.v1.views.management import ZoneImportByID, \
     ZoneExportByID, ZoneDetailView, ZoneResourceRecord, \
-    ZoneView, ServiceView
+    ZoneView, ServiceView, ZoneReload
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework_swagger.views import get_swagger_view
@@ -23,6 +23,8 @@ urlpatterns = [
          name='zone_list_id'),
     path('zone/<int:pk>/RR', ZoneResourceRecord.as_view(),
          name='zone_add_rr'),
+    path('zone/<int:pk>/reload', ZoneReload.as_view(),
+         name='zone_id_reload'),
     path('rest-auth/', include('rest_auth.urls')),
 ]
 
