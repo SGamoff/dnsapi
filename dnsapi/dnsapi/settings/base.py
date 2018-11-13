@@ -118,6 +118,10 @@ REST_FRAMEWORK = {
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
+# LOGIN_URL = 'rest-auth:login'
+# LOGOUT_URL = 'rest-auth:logout'
+
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

@@ -1,7 +1,7 @@
 from api.v1.serializers import ServiceSerilializers, ZoneSerilializers
-from api.v1.utils.zoneoperations import ZoneOperations, \
+from apps.editor.utils.zoneoperations import ZoneOperations, \
     ResourceRecordOperations
-from  api.v1.utils.serviceoperations import ServiceOpertaions
+from apps.editor.utils.serviceoperations import ServiceOpertaions
 from apps.editor.models import Service, Zone
 from django.http import Http404
 from rest_framework.views import APIView
@@ -123,7 +123,7 @@ class ZoneReload(APIView):
         try:
             zone_obj=Zone.objects.get(zone_id__exact=pk)
             serv_obj =Service.objects.get(name__exact=zone_obj.service.name)
-            return ServiceOpertaions(serv_obj.name, serv_obj.port)
+            return ServiceOpertaions(serv_obj.name, serv_obj.port, zone_obj.zone_name)
         except Service.DoesNotExist:
             raise Http404
 

@@ -12,10 +12,7 @@ services:
      expose:
        - "53"
      volumes:
-       - ./conf/named.conf:/etc/bind/named.conf
-       - ./conf/rndc.conf:/etc/bind/rndc.conf
-       - ./conf/localhost.zone:/etc/bind/localhost.zone
-       - ./conf/127.zone:/etc/bind/127.zone
+       - ./conf/:/etc/bind/
      networks:
        default:
          ipv4_address: 172.15.0.2
