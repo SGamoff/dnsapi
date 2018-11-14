@@ -4,6 +4,7 @@ from django.db import models
 
 
 class Service(models.Model):
+    service_id = models.AutoField(primary_key=True)
     name = models.CharField(default='127.0.0.1',
                             null=False, max_length=255,
                             verbose_name='DNS/IP Server')

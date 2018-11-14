@@ -80,20 +80,20 @@ class ZoneOperations:
             if len(find_zone.zone_text) > 0:
                 mod_zone = dns.zone.from_text(
                     find_zone.zone_text.replace('\r', ''), self.zone_name)
-            default_ttl = dns.ttl.from_text('0')
+            default_ttl = dns.ttl.from_text('300')
             for (name, ttl, rdata) in mod_zone.iterate_rdatas('SOA'):
                 serial = self._generate_serial(rdata.serial)
                 default_ttl = str(ttl)
                 rdata.serial = serial
-            rr_ttl = dns.ttl.from_text(request.data.get('rrttl', default_ttl))
-            rr_type = dns.rdatatype.from_text(request.data.get('rrtype'))
+            rr_ttl = dns.ttl.from_text(request.data.get('rr_ttl', default_ttl))
+            rr_type = dns.rdatatype.from_text(request.data.get('rr_type'))
             origin_name = dns.name.from_text(self.zone_name)
             rr_name = dns.name.from_text(
-                request.data.get('rrname', '@'), origin_name)
+                request.data.get('rr_name', '@'), origin_name)
             rr_class = dns.rdataclass.from_text(
-                request.data.get('rrclass', 'IN'))
+                request.data.get('rr_class', 'IN'))
             rr_dataset = mod_zone.find_rdataset(rr_name, rr_type, create=True)
-            rr_text = request.data.get('rrtext', None)
+            rr_text = request.data.get('rr_text', None)
             rr_data = dns.rdata.from_text(rr_class, rr_type, rr_text)
             rr_dataset.add(rr_data, rr_ttl)
             find_zone.zone_text = mod_zone.to_text().decode('utf-8')
@@ -115,10 +115,10 @@ class ZoneOperations:
             for (name, ttl, rdata) in mod_zone.iterate_rdatas('SOA'):
                 serial = self._generate_serial(rdata.serial)
                 rdata.serial = serial
-            rr_type = dns.rdatatype.from_text(request.data.get('rrtype'))
+            rr_type = dns.rdatatype.from_text(request.data.get('rr_type'))
             origin_name = dns.name.from_text(self.zone_name)
             rr_name = dns.name.from_text(
-                request.data.get('rrname', '@'), origin_name)
+                request.data.get('rr_name', '@'), origin_name)
             mod_zone.delete_rdataset(rr_name, rr_type)
             find_zone.zone_text = mod_zone.to_text().decode('utf-8')
             find_zone.save()

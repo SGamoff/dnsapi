@@ -1,3 +1,5 @@
+import coreapi
+import coreschema
 from api.v1.serializers import ServiceSerilializers, ZoneSerilializers
 from apps.editor.utils.zoneoperations import ZoneOperations, \
     ResourceRecordOperations
@@ -6,6 +8,7 @@ from apps.editor.models import Service, Zone
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.schemas import AutoSchema
 from rest_framework import permissions
 from rest_framework import viewsets
 
@@ -66,11 +69,73 @@ class ZoneExportByID(APIView):
         return Response({'message': str(zone_export.export_zone_to_txt())})
 
 
+class ZoneResourceRecordViewSchema(AutoSchema):
+
+    def get_manual_fields(self, path, method):
+        extra_fields = []
+        if method == "GET":
+            pass
+        if method == "DELETE":
+            extra_fields = [
+                coreapi.Field(
+                    "rr_name", required=False,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Name(default @)"
+                    )
+                ),
+                coreapi.Field(
+                    "rr_type", required=True,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Type"
+                    )
+                )
+            ]
+        if method == "POST":
+            extra_fields = [
+                coreapi.Field(
+                    "rr_name", required=False,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Name(default @)"
+                    )
+                ),
+                coreapi.Field(
+                    "rr_type", required=True,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Type"
+                    )
+                ),
+                coreapi.Field(
+                    "rr_ttl", required=False,
+                    location="form", schema=coreschema.Integer(
+                        description="Resource record TTL(default from SOA)",
+                        maximum=2147483647, minimum=300
+                    )
+                ),
+                coreapi.Field(
+                    "rr_class", required=False,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Class(default IN)",
+                        max_length=3
+                    )
+                ),
+                coreapi.Field(
+                    "rr_text", required=True,
+                    location="form", schema=coreschema.String(
+                        description="Resource record Content"
+                    )
+                ),
+            ]
+
+        manual_fields = super().get_manual_fields(path, method)
+        return manual_fields + extra_fields
+
+
 class ZoneResourceRecord(APIView):
     """
     A router for API Zone resource records operations by zone ID POST
     """
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    schema = ZoneResourceRecordViewSchema()
 
     @staticmethod
     def get_object(pk):
@@ -89,11 +154,11 @@ class ZoneResourceRecord(APIView):
         find_record = ResourceRecordOperations(rr_text.zone_id)
         return Response(str(find_record.find_and_return_records()))
 
-    def put(self, request, pk):
+    def post(self, request, pk):
         return Response({'message': str(
             self.get_zone(pk).add_resource_record(request))})
 
-    def post(self, request, pk):
+    def delete(self, request, pk):
         return Response({'message': str(
             self.get_zone(pk).del_resource_record(request))})
 
@@ -130,3 +195,4 @@ class ZoneReload(APIView):
     def post(self, request, pk):
         return Response({"message": str(
             self.get_service_obj(pk).rndc_reload_service())})
+
