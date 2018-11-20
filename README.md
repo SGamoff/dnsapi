@@ -33,3 +33,11 @@ zone "management-zone" IN {
 RNDCKEY=<content management-key>
 RNDCALGO=<algorithm used key creation>
 ```
+
+##### Docker run example:
+Just run
+
+```
+docker-compose up -d
+```
+And go url http://127.0.0.1:8000/docs/ where you can see api documentation
